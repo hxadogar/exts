@@ -1,0 +1,38 @@
+{
+  "manifest_version": 2,
+  "name": "AltDiscard",
+  "version": "1.0.2",
+  "description": "Hold Alt+Click on links to open them in discarded (unloaded) state",
+  "author": "Hamza dogar @hxadogar",
+  "homepage_url": "https://github.com/hxadogar/exts/tree/main/alt-discard",
+  "background": {
+    "scripts": ["background.js"]
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "run_at": "document_start"
+    }
+  ],
+  "browser_action": {
+    "default_area": "navbar"
+  },
+  "options_ui": {
+    "page": "options.html",
+    "browser_style": true
+  },
+  "icons": {
+    "128": "icon.ico"
+  },
+  "permissions": [
+    "tabs",
+    "contextMenus"
+  ],
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "altdiscard@hxadogar.github.io",
+      "strict_min_version": "54.0"
+    }
+  }
+}
