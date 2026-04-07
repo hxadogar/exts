@@ -1,50 +1,33 @@
 /* global browser */
 
 (function () {
-  'use strict';
+  "use strict";
 
-  let clickHandler = null;
+  let altActive = false;
+  let ctrlActive = false;
 
-  function attachClickListener() {
-    if (clickHandler) return;
+  // Unified click handler for both Alt and Ctrl
+  function clickHandler(e) {
+    const link = e.target.closest("a");
+    if (!link || !link.href) return;
 
-    clickHandler = function (e) {
-      if (!e.altKey) return;
-
-      const link = e.target.closest('a');
-      if (!link || !link.href) return;
-
+    if (e.altKey) {
+      // Alt+Click → open discarded
       e.preventDefault();
       e.stopPropagation();
-
-      browser.runtime.sendMessage({
-        action: 'openDiscarded',
-        url: link.href
-      });
-    };
-
-    document.addEventListener('click', clickHandler, true);
-  }
-
-  function detachClickListener() {
-    if (clickHandler) {
-      document.removeEventListener('click', clickHandler, true);
-      clickHandler = null;
+      browser.runtime.sendMessage({ action: "openDiscarded", url: link.href });
+    } else if (e.ctrlKey || e.metaKey) {
+      // Ctrl+Click → open regular tab but through our index tracker
+      e.preventDefault();
+      e.stopPropagation();
+      browser.runtime.sendMessage({ action: "openRegular", url: link.href });
     }
   }
 
-  window.addEventListener('keydown', function (e) {
-    if (e.key === 'Alt' || e.key === 'AltGraph') {
-      attachClickListener();
-    }
-  });
+  document.addEventListener("click", clickHandler, true);
 
-  window.addEventListener('keyup', function (e) {
-    if (e.key === 'Alt' || e.key === 'AltGraph') {
-      detachClickListener();
-    }
+  // Detach on unload/blur to be clean
+  window.addEventListener("unload", function () {
+    document.removeEventListener("click", clickHandler, true);
   });
-
-  window.addEventListener('blur', detachClickListener);
-  window.addEventListener('unload', detachClickListener);
 })();
